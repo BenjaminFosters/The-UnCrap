@@ -10,7 +10,7 @@ def calc_entropy_from_file(filepath: str) -> float:
     from collections import Counter
     import math
 
-    with open(filepath, 'rb') as f:
+    with open(filepath, "rb") as f:
         data = f.read()
 
     value_counts = Counter(data)
