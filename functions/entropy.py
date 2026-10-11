@@ -1,8 +1,7 @@
 def calc_entropy_from_file(filepath: str) -> float:
-    """
-    Calculate the Shannon-Entropy of a given file.
+    """Calculate the Shannon-Entropy of a given file.
 
-    Parameters:
+    Args:
     filepath (str): The path to the file.
 
     Returns:
