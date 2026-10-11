@@ -50,7 +50,6 @@ def compareLedger(oldLedger: str, newLedger: str) -> bool:
     Returns:
         bool: True if the files are identical, False otherwise.
     """
-
     try:
         with open(oldLedger, "r") as file1, open(newLedger, "r") as file2:
             return file1.read() == file2.read()
@@ -68,5 +67,4 @@ def promoteLedger(oldLedger: str, newLedger: str) -> None:
     Returns:
     None
     """
-
     Path(newLedger).replace(oldLedger)
