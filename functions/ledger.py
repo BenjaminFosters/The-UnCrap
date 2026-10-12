@@ -1,35 +1,36 @@
-from pathlib import Path
-from datetime import datetime, timezone
 import csv
-import functions.calc_entropy as calc_entropy
+from datetime import UTC, datetime
+from pathlib import Path
+
+from functions import calc_entropy
+
+tempLedgerName = ".TheUnCrap_Ledger.tmp"
+finLedgerName = ".TheUnCrap_Ledger.csv"
 
 
-def build(directory: str, ledger_path: str) -> None:
-    """Builds a CSV-based Ledger with the format "RelativePath;Date;FileSize;Entropy" for all files in given directory.
+def build(scan_directory: str) -> None:
+    """Makes a temporary ledger of all files in the given directory and saves it as a CSV file.
 
     Args:
-        directory (str): The path to the directory.
-        ledger_path (str): The path to the ledger file. (Ended with CSV)
-
-    Raises:
-        ValueError: If the ledgerPath does not end with ".csv".
+        scan_directory (str): The directory to scan for files and build the ledger.
     """
-    if ledger_path.split(".")[-1] != "csv":
-        raise ValueError("Ledger file must be a CSV file.")
-
-    with Path(ledger_path).open("w") as file:
+    with Path(f"{scan_directory}/{tempLedgerName}").open("w") as file:
         writer = csv.writer(file)
         writer.writerow(["RelativePath", "Date", "FileSize", "Entropy"])
 
-        for file_path in sorted(Path(directory).rglob("*")):
-            if file_path.is_file() and file_path != Path(ledger_path):
+        for file_path in sorted(Path(scan_directory).rglob("*")):
+            if (
+                file_path.is_file()
+                and file_path.name != tempLedgerName
+                and file_path.name != finLedgerName
+            ):
                 modified = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone(
-                    timezone.utc
+                    UTC
                 )
 
                 writer.writerow(
                     [
-                        file_path.relative_to(directory),
+                        file_path.relative_to(scan_directory),
                         modified,
                         file_path.stat().st_size,
                         calc_entropy.from_file(str(file_path)),
@@ -37,34 +38,42 @@ def build(directory: str, ledger_path: str) -> None:
                 )
 
 
-def compare(old: str, new: str) -> bool:
-    """Compares two ledger files to check if they are identical.
+def compare(scan_directory: str) -> bool:
+    """Compare new and old ledger
 
     Args:
-        old (str): The path to the old ledger file.
-        new (str): The path to the new ledger file.
-
-    Raises:
-        e: Exception: If there is an error reading the files.
+        scan_directory (str): The directory to scan for files and compare the ledgers.
 
     Returns:
-        bool: True if the files are identical, False otherwise.
+        bool: True if the ledgers are identical, False otherwise.
     """
     try:
-        with open(old, "r") as file1, open(new, "r") as file2:
-            return file1.read() == file2.read()
+        with (
+            Path(f"{scan_directory}/{tempLedgerName}").open("r") as pending,
+            Path(f"{scan_directory}/{finLedgerName}").open("r") as old,
+        ):
+            return pending.read() == old.read()
     except FileNotFoundError:
         return False
 
 
-def promote(old: str, new: str) -> None:
-    """Promotes the new ledger to replace the old ledger.
+def promote(scan_directory: str) -> None:
+    """Promote (replace) old ledger with a new one
 
     Args:
-        old (str): The path to the old ledger file.
-        new (str): The path to the new ledger file.
-
-    Returns:
-    None
+        scan_directory (str): The directory to scan for files and promote the ledgers.
     """
-    Path(new).replace(old)
+    Path(f"{scan_directory}/{tempLedgerName}").replace(
+        f"{scan_directory}/{finLedgerName}"
+    )
+
+
+def delete_temp(scan_directory: str) -> None:
+    """Delete temporary ledger file
+
+    Args:
+        scan_directory (str): The directory to scan for files and delete the temporary ledger.
+    """
+    temp_ledger_path = Path(f"{scan_directory}/{tempLedgerName}")
+    if temp_ledger_path.exists():
+        temp_ledger_path.unlink()
