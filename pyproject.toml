@@ -1,2 +1,3 @@
 [tool.ruff.lint]
 extend-select = ["N"]
+ignore = ["EXE002"]
