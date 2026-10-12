@@ -14,15 +14,15 @@ def build(scan_directory: str) -> None:
     Args:
         scan_directory (str): The directory to scan for files and build the ledger.
     """
-    with Path(f"{scan_directory}/{tempLedgerName}").open("w") as file:
+    with Path(f"{scan_directory}/{TempLedgerName}").open("w") as file:
         writer = csv.writer(file)
         writer.writerow(["RelativePath", "Date", "FileSize", "Entropy"])
 
         for file_path in sorted(Path(scan_directory).rglob("*")):
             if (
                 file_path.is_file()
-                and file_path.name != tempLedgerName
-                and file_path.name != finLedgerName
+                and file_path.name != TempLedgerName
+                and file_path.name != FinLedgerName
             ):
                 modified = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone(
                     UTC
@@ -49,8 +49,8 @@ def compare(scan_directory: str) -> bool:
     """
     try:
         with (
-            Path(f"{scan_directory}/{tempLedgerName}").open("r") as pending,
-            Path(f"{scan_directory}/{finLedgerName}").open("r") as old,
+            Path(f"{scan_directory}/{TempLedgerName}").open("r") as pending,
+            Path(f"{scan_directory}/{FinLedgerName}").open("r") as old,
         ):
             return pending.read() == old.read()
     except FileNotFoundError:
@@ -63,8 +63,8 @@ def promote(scan_directory: str) -> None:
     Args:
         scan_directory (str): The directory to scan for files and promote the ledgers.
     """
-    Path(f"{scan_directory}/{tempLedgerName}").replace(
-        f"{scan_directory}/{finLedgerName}"
+    Path(f"{scan_directory}/{TempLedgerName}").replace(
+        f"{scan_directory}/{FinLedgerName}"
     )
 
 
@@ -74,6 +74,6 @@ def delete_temp(scan_directory: str) -> None:
     Args:
         scan_directory (str): The directory to scan for files and delete the temporary ledger.
     """
-    temp_ledger_path = Path(f"{scan_directory}/{tempLedgerName}")
+    temp_ledger_path = Path(f"{scan_directory}/{TempLedgerName}")
     if temp_ledger_path.exists():
         temp_ledger_path.unlink()
