@@ -4,8 +4,8 @@ from pathlib import Path
 
 from functions import calc_entropy
 
-tempLedgerName = ".TheUnCrap_Ledger.tmp"
-finLedgerName = ".TheUnCrap_Ledger.csv"
+TempLedgerName = ".TheUnCrap_Ledger.tmp"
+FinLedgerName = ".TheUnCrap_Ledger.csv"
 
 
 def build(scan_directory: str) -> None:
