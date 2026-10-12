@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import csv
-import entropy
+import functions.calc_entropy as calc_entropy
 
 
 def build(directory: str, ledger_path: str) -> None:
@@ -32,7 +32,7 @@ def build(directory: str, ledger_path: str) -> None:
                         file_path.relative_to(directory),
                         modified,
                         file_path.stat().st_size,
-                        entropy.from_file(str(file_path)),
+                        calc_entropy.from_file(str(file_path)),
                     ]
                 )
 
