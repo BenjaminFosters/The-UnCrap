@@ -224,3 +224,6 @@ __marimo__/
 # File for Testing Script
 
 testflight_folder
+
+# Config File
+config.toml
